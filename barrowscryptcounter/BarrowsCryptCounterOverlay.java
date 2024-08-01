@@ -1,4 +1,4 @@
-package com.barrowscryptcounter;
+package net.runelite.client.plugins.barrowscryptcounter;
 
 import net.runelite.api.Client;
 import net.runelite.client.ui.FontManager;
@@ -19,6 +19,9 @@ class BarrowsCryptCounterOverlay extends OverlayPanel {
     private final BarrowsCryptCounterPlugin plugin;
     private final BarrowsCryptCounterConfig config;
 
+    private Map<String, Integer> killCounts;
+    private List<String> npcList;
+
     @Inject
     private BarrowsCryptCounterOverlay(BarrowsCryptCounterPlugin plugin, Client client, BarrowsCryptCounterConfig config) {
         super(plugin);
@@ -30,8 +33,15 @@ class BarrowsCryptCounterOverlay extends OverlayPanel {
         addMenuEntry(RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Barrows Counter Overlay");
     }
 
+    public void setKillCounts(Map<String, Integer> killCounts) {
+        this.killCounts = killCounts;
+    }
+
+    public void setNpcList(List<String> npcList) {
+        this.npcList = npcList;
+    }
+
     private void drawNPC(Graphics2D graphics, String npcName, int x, int y) {
-        Map<String, Integer> killCounts = plugin.getKillCounts();
         int kills = killCounts.getOrDefault(npcName, 0);
         int targetKills;
 
@@ -59,7 +69,6 @@ class BarrowsCryptCounterOverlay extends OverlayPanel {
                 break;
         }
 
-        // Change color based on whether target has been reached
         if (kills >= targetKills) {
             graphics.setColor(Color.GREEN);
         } else {
@@ -71,7 +80,10 @@ class BarrowsCryptCounterOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        List<String> npcList = plugin.getNpcList();
+        if (npcList == null || killCounts == null) {
+            return null; // Prevent rendering if data is not initialized
+        }
+
         int panelHeight = 30 + npcList.size() * 20;
         graphics.setColor(new Color(0, 0, 0, 150));
         graphics.fillRect(10, 10, 150, panelHeight);

@@ -1,10 +1,14 @@
-package com.barrowscryptcounter;
+package net.runelite.client.plugins.barrowscryptcounter;
 
+import com.google.inject.Provides;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.widgets.InterfaceID;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -25,7 +29,6 @@ import java.util.Map;
         tags = {"barrows", "counter"}
 )
 public class BarrowsCryptCounterPlugin extends Plugin {
-    // Create a data structure to store the kill counts of small NPCs
     private Map<String, Integer> killCounts;
     private List<String> npcList;
 
@@ -40,77 +43,104 @@ public class BarrowsCryptCounterPlugin extends Plugin {
     @Inject
     private OverlayManager overlayManager;
 
+    @Inject
+    private BarrowsCryptCounterConfig config;
+
+    @Provides
+    BarrowsCryptCounterConfig provideConfig(ConfigManager configManager) {
+        return configManager.getConfig(BarrowsCryptCounterConfig.class);
+    }
+
     @Override
     protected void startUp() throws Exception {
-        // Initialize the data structure and any other setup tasks
         killCounts = new HashMap<>();
         npcList = new ArrayList<>();
+        initializeNpcList();
         overlayManager.add(overlay);
     }
 
     @Override
     protected void shutDown() throws Exception {
-        // Perform any cleanup or saving of data when the plugin is disabled
+        killCounts.clear();
+        npcList.clear();
+        overlayManager.remove(overlay);
+    }
+
+    private void initializeNpcList() {
+        npcList.add("Crypt rat");
+        npcList.add("Bloodworm");
+        npcList.add("Crypt spider");
+        npcList.add("Giant crypt rat");
+        npcList.add("Skeleton");
+        npcList.add("Giant crypt spider");
+        // Add more NPCs here if needed
     }
 
     @Subscribe
     public void onActorDeath(ActorDeath event) {
-        // Check if the dead actor is a small NPC in the Barrows basement
         if (isSmallBarrowsNPC(event.getActor().getName())) {
-            // Get the local player
             Actor localPlayer = client.getLocalPlayer();
-
-            // Check if the local player caused the death
             if (event.getActor().getInteracting() == localPlayer) {
                 String npcName = event.getActor().getName();
                 killCounts.compute(npcName, (name, currentKills) -> (currentKills == null) ? 1 : currentKills + 1);
                 logger.info("Killed: " + Text.removeTags(npcName));
 
-                // Add the NPC to the list of killed NPCs if not already there
                 if (!npcList.contains(npcName)) {
                     npcList.add(npcName);
                 }
 
-                // Call a method to update the overlay with the new kill count and NPC list
                 updateOverlay();
             }
         }
     }
 
-
     private boolean isSmallBarrowsNPC(String npcName) {
-        // Implement this method to check if the NPC is one of the small NPCs in the Barrows basement
-        // Return true if it's a small NPC, false otherwise
-
-        // Add the names of all small Barrows NPCs here
-        String[] smallBarrowsNPCs = {
-                "Crypt rat",
-                "Bloodworm",
-                "Crypt spider",
-                "Giant crypt rat",
-                "Skeleton",
-                "Giant crypt spider"
-        };
-
-        for (String smallNPC : smallBarrowsNPCs) {
-            if (npcName.equalsIgnoreCase(smallNPC)) {
-                return true;
-            }
-        }
-
-        return false;
+        return npcList.contains(npcName);
     }
 
     private void updateOverlay() {
-        // Call a method to display the kill count and NPC list overlay on the screen
+//        setKillCounts(new HashMap<>(killCounts));
+//        setNpcList(new ArrayList<>(npcList));
+//        overlay.update(); // Ensure the overlay updates with the latest data
+    }
+
+    @Subscribe
+    public void onWidgetLoaded(WidgetLoaded event) {
+        if (event.getGroupId() == InterfaceID.BARROWS_REWARD) {
+            resetKillCounts(); // Reset on chest opening
+        }
+    }
+
+    private void resetKillCounts() {
+        killCounts.clear();
+        initializeNpcList(); // Reinitialize NPC list if necessary
+        updateOverlay(); // Ensure overlay is updated after resetting counts
     }
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged event) {
         if (event.getGameState() == GameState.LOGIN_SCREEN) {
-            // Clear the kill count and NPC list when the player logs out or hops worlds
             killCounts.clear();
             npcList.clear();
+        }
+    }
+
+    public int getTargetCountForNpc(String npcName) {
+        switch (npcName) {
+            case "Crypt Rat":
+                return config.targetCryptRat();
+            case "Bloodworm":
+                return config.targetBloodworm();
+            case "Crypt Spider":
+                return config.targetCryptSpider();
+            case "Giant Crypt Rat":
+                return config.targetGiantCryptRat();
+            case "Skeleton":
+                return config.targetSkeleton();
+            case "Giant Crypt Spider":
+                return config.targetGiantCryptSpider();
+            default:
+                return 0;
         }
     }
 
