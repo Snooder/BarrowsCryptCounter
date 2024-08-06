@@ -1,16 +1,12 @@
 # Barrows Crypt Counter Plugin
-Description
 
 The Barrows Crypt Counter plugin is a tool for tracking the number of small NPCs killed in the Barrows basement in Old School RuneScape. This plugin helps players keep track of their progress by displaying a counter overlay for various NPCs within the Barrows crypt, including the Barrows brothers and other crypt creatures.
 
-![image](https://github.com/user-attachments/assets/c055acd8-fd7e-4ea8-aefd-7213dcd8bb5b)
-
-![image](https://github.com/user-attachments/assets/babf10d9-a68c-4da0-b129-5a05ad23403b)
-
-![image](https://github.com/user-attachments/assets/cdc18ecf-4ec5-4639-b53e-cabc88da8855)
-
-![image](https://github.com/user-attachments/assets/bb4f2228-3af6-4c01-aaf4-f6eb3156dd67)
-
+<img src="https://github.com/user-attachments/assets/c055acd8-fd7e-4ea8-aefd-7213dcd8bb5b" alt="NPC Kill Counts" width="200"/>
+<img src="https://github.com/user-attachments/assets/babf10d9-a68c-4da0-b129-5a05ad23403b" alt="NPC Kill Counts" width="200"/>
+<img src="https://github.com/user-attachments/assets/cdc18ecf-4ec5-4639-b53e-cabc88da8855" alt="NPC Kill Counts" width="200"/>
+<br>
+<img src="https://github.com/user-attachments/assets/bb4f2228-3af6-4c01-aaf4-f6eb3156dd67" alt="Barrows Brothers Kill Counts"/>
 
 # NPC Kill Count Tracking
 Track Kill Counts: Automatically tracks and displays the number of kills for various small NPCs in the Barrows crypt, including:
