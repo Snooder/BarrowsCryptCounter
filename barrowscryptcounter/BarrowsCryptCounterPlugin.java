@@ -34,7 +34,7 @@ import java.util.Map;
 )
 public class BarrowsCryptCounterPlugin extends Plugin {
     private static final Logger logger = (Logger) LoggerFactory.getLogger(BarrowsCryptCounterPlugin.class);
-    private static final long INACTIVITY_THRESHOLD_MS = 1800000; // 30 minutes inactivity threshold
+    private static final long INACTIVITY_THRESHOLD_MS = 900000; // 15 minutes inactivity threshold
     private static final int BARROWS_REGION_ID = 14131; // Example region ID for Barrows
     private static final int BARROWS_CRYPT_REGION_ID = 14231; // Example region ID for Barrows Crypt
     private static final String KILL_COUNTS_FILE = "barrows_kill_counts.dat";
