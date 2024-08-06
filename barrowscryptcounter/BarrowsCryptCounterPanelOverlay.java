@@ -2,21 +2,24 @@ package net.runelite.client.plugins.barrowscryptcounter;
 
 import com.google.inject.Provides;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.Varbits;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.awt.*;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class BarrowsCryptCounterPanelOverlay extends Overlay {
+    private static final Logger logger = LoggerFactory.getLogger(BarrowsCryptCounterPanelOverlay.class);
     private final BarrowsCryptCounterPlugin plugin;
     private final PanelComponent panelComponent;
     private static final DecimalFormat REWARD_POTENTIAL_FORMATTER = new DecimalFormat("##0.00%");
@@ -35,27 +38,30 @@ public class BarrowsCryptCounterPanelOverlay extends Overlay {
         this.config = config;
         this.client = client;
         panelComponent = new PanelComponent();
-        panelComponent.setBorder(new Rectangle(5, 5, 5, 5));
     }
 
-    @Override
-    public Dimension render(Graphics2D graphics) {
+    public void updatePanel() {
+        logger.info("Updating panel...");
+
+        // Clear previous children
+        panelComponent.getChildren().clear();
+
         Map<String, Integer> killCounts = plugin.getKillCounts();
         List<String> npcList = plugin.getNpcList();
         boolean allTargetsMet = true;
 
-        panelComponent.getChildren().clear();
-
         // Determine if all targets are met
         for (String npcName : npcList) {
             int target = plugin.getTargetCountForNpc(npcName);
-            if (killCounts.getOrDefault(npcName, 0) < target) {
+            int kills = killCounts.getOrDefault(npcName, 0);
+            logger.info("NPC: {} Kills: {} Target: {}", npcName, kills, target); // Debug line
+            if (kills < target) {
                 allTargetsMet = false;
             }
         }
 
         // Set panel background color based on whether all targets are met
-        Color backgroundColor = allTargetsMet ? config.completionColor() : config.backgroundColor();
+        Color backgroundColor = config.backgroundColor();
         panelComponent.setBackgroundColor(new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 150));
 
         // Set text color based on dark mode setting
@@ -66,36 +72,31 @@ public class BarrowsCryptCounterPanelOverlay extends Overlay {
                 .leftColor(textColor)
                 .build());
 
-        // Add NPC kill counts to the panel, including crypt creatures
+        // Add NPC kill counts to the panel, including crypt creatures and Barrows brothers
         for (String npcName : npcList) {
-            int kills = killCounts.getOrDefault(npcName, 0);
             int target = plugin.getTargetCountForNpc(npcName);
+            int kills = killCounts.getOrDefault(npcName, 0);
+            if (target == 0 && kills == 0) {
+                continue; // Skip NPCs with target and kills both at 0
+            }
+            if (target == 0 && kills > 0) {
+                String lineText = npcName + ": " + kills + "/" + target;
+                panelComponent.getChildren().add(LineComponent.builder()
+                        .left(lineText)
+                        .leftColor(Color.RED)
+                        .build());
+                continue;
+            }
             String lineText = npcName + ": " + kills + "/" + target;
+            Color npcColor = (kills > target) ? Color.RED : (kills >= target) ? Color.GREEN : textColor; // Set color to red if over target, green if completed
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(lineText)
-                    .leftColor(textColor)
+                    .leftColor(npcColor)
                     .build());
         }
 
-        // Add Barrows brothers kill counts to the panel if not hidden
-        if (!config.hideBrothers()) {
-            List<String> brothers = Arrays.asList("Ahrim", "Dharok", "Guthan", "Karil", "Torag", "Verac");
-            for (String brother : brothers) {
-                int kills = killCounts.getOrDefault(brother, 0);
-                int target = plugin.getTargetCountForNpc(brother);
-                if (target == 0) {
-                    target = 1; // Default to 1 if not set
-                }
-                String lineText = brother + ": " + kills + "/" + target;
-                panelComponent.getChildren().add(LineComponent.builder()
-                        .left(lineText)
-                        .leftColor(textColor)
-                        .build());
-            }
-        }
-
-        // Display reward potential if enabled
-        if (config.showRewardPotential()) {
+        // Display reward potential if enabled and client is in a valid state
+        if (config.showRewardPotential() && client != null && client.getGameState() == GameState.LOGGED_IN && client.getLocalPlayer() != null) {
             final int rewardPotential = client.getVarbitValue(Varbits.BARROWS_REWARD_POTENTIAL);
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Potential")
@@ -104,7 +105,40 @@ public class BarrowsCryptCounterPanelOverlay extends Overlay {
                     .rightColor(rewardPotential >= 756 && rewardPotential < 881 ? Color.GREEN : rewardPotential < 631 ? Color.WHITE : Color.YELLOW)
                     .build());
         }
+        logger.info("Panel updated.");
+    }
 
-        return panelComponent.render(graphics);
+    @Override
+    public Dimension render(Graphics2D graphics) {
+        if (client == null || client.getGameState() != GameState.LOGGED_IN || client.getLocalPlayer() == null) {
+            logger.warn("Client is not ready, skipping render.");
+            return null;
+        }
+
+        logger.info("Rendering panel...");
+
+        Dimension dimension = panelComponent.render(graphics);
+
+        // Draw the custom border
+        boolean allTargetsMet = true;
+        for (String npcName : plugin.getNpcList()) {
+            int target = plugin.getTargetCountForNpc(npcName);
+            int kills = plugin.getKillCounts().getOrDefault(npcName, 0);
+            if (kills < target) {
+                allTargetsMet = false;
+                break;
+            }
+        }
+
+        if (allTargetsMet) {
+            Color borderColor = config.completionBorderColor();
+            graphics.setColor(borderColor);
+            Rectangle bounds = panelComponent.getBounds();
+            if (bounds != null) {
+                graphics.drawRect(bounds.x - 1, bounds.y - 1, bounds.width + 1, bounds.height + 1);
+            }
+        }
+
+        return dimension;
     }
 }

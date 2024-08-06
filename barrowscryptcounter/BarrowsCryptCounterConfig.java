@@ -8,7 +8,7 @@ import java.awt.*;
 public interface BarrowsCryptCounterConfig extends Config
 {
     @ConfigSection(
-            name = "Crypt Crypt Counter",
+            name = "Crypt Creatures Counter",
             description = "Settings for counting crypt creatures",
             position = 0
     )
@@ -81,9 +81,82 @@ public interface BarrowsCryptCounterConfig extends Config
     }
 
     @ConfigSection(
+            name = "Brothers Counter",
+            description = "Settings for counting Barrows brothers",
+            position = 1
+    )
+    String brothersCounterSection = "brothersCounterSection";
+
+    @ConfigItem(
+            keyName = "targetAhrim",
+            name = "Ahrim",
+            description = "Set the target number for Ahrim kills",
+            position = 6,
+            section = brothersCounterSection
+    )
+    default int targetAhrim() {
+        return 0;
+    }
+
+    @ConfigItem(
+            keyName = "targetDharok",
+            name = "Dharok",
+            description = "Set the target number for Dharok kills",
+            position = 7,
+            section = brothersCounterSection
+    )
+    default int targetDharok() {
+        return 0;
+    }
+
+    @ConfigItem(
+            keyName = "targetGuthan",
+            name = "Guthan",
+            description = "Set the target number for Guthan kills",
+            position = 8,
+            section = brothersCounterSection
+    )
+    default int targetGuthan() {
+        return 0;
+    }
+
+    @ConfigItem(
+            keyName = "targetKaril",
+            name = "Karil",
+            description = "Set the target number for Karil kills",
+            position = 9,
+            section = brothersCounterSection
+    )
+    default int targetKaril() {
+        return 0;
+    }
+
+    @ConfigItem(
+            keyName = "targetTorag",
+            name = "Torag",
+            description = "Set the target number for Torag kills",
+            position = 10,
+            section = brothersCounterSection
+    )
+    default int targetTorag() {
+        return 0;
+    }
+
+    @ConfigItem(
+            keyName = "targetVerac",
+            name = "Verac",
+            description = "Set the target number for Verac kills",
+            position = 11,
+            section = brothersCounterSection
+    )
+    default int targetVerac() {
+        return 0;
+    }
+
+    @ConfigSection(
             name = "Panel",
             description = "Settings for the display panel",
-            position = 1
+            position = 2
     )
     String panelSection = "panelSection";
 
@@ -121,91 +194,24 @@ public interface BarrowsCryptCounterConfig extends Config
     }
 
     @ConfigItem(
-            keyName = "completionColor",
-            name = "Completion Color",
-            description = "Set the background color when all targets are met",
+            keyName = "completionBorderColor",
+            name = "Completion Border Color",
+            description = "Set the border color when all targets are met",
             position = 3,
             section = panelSection
     )
-    default Color completionColor() {
+    default Color completionBorderColor() {
         return new Color(0, 255, 0, 150);
     }
 
-    // Add config items for each Barrows brother
     @ConfigItem(
-            keyName = "targetAhrim",
-            name = "Target number for Ahrim",
-            description = "Set the target number for Ahrim kills",
-            position = 6,
-            section = cryptCounterSection
+            keyName = "resetKillCounts",
+            name = "Click to reset Kill Counts",
+            description = "Reset all kill counts",
+            position = 5,
+            section = panelSection
     )
-    default int targetAhrim() {
-        return 1;
+    default Button resetKillCounts() {
+        return new Button();
     }
-
-    @ConfigItem(
-            keyName = "targetDharok",
-            name = "Target number for Dharok",
-            description = "Set the target number for Dharok kills",
-            position = 7,
-            section = cryptCounterSection
-    )
-    default int targetDharok() {
-        return 1;
-    }
-
-    @ConfigItem(
-            keyName = "targetGuthan",
-            name = "Target number for Guthan",
-            description = "Set the target number for Guthan kills",
-            position = 8,
-            section = cryptCounterSection
-    )
-    default int targetGuthan() {
-        return 1;
-    }
-
-    @ConfigItem(
-            keyName = "targetKaril",
-            name = "Target number for Karil",
-            description = "Set the target number for Karil kills",
-            position = 9,
-            section = cryptCounterSection
-    )
-    default int targetKaril() {
-        return 1;
-    }
-
-    @ConfigItem(
-            keyName = "targetTorag",
-            name = "Target number for Torag",
-            description = "Set the target number for Torag kills",
-            position = 10,
-            section = cryptCounterSection
-    )
-    default int targetTorag() {
-        return 1;
-    }
-
-    @ConfigItem(
-            keyName = "targetVerac",
-            name = "Target number for Verac",
-            description = "Set the target number for Verac kills",
-            position = 11,
-            section = cryptCounterSection
-    )
-    default int targetVerac() {
-        return 1;
-    }
-
-    @ConfigItem(
-            keyName = "hideBrothers",
-            name = "Hide Brothers",
-            description = "Toggle to hide Barrows brothers in the overlay"
-    )
-    default boolean hideBrothers() {
-        return false; // Default to false if not explicitly set
-    }
-
 }
-
