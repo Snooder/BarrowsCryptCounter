@@ -9,6 +9,8 @@ The Barrows Crypt Counter plugin is a tool for tracking the number of small NPCs
 
 ![image](https://github.com/user-attachments/assets/cdc18ecf-4ec5-4639-b53e-cabc88da8855)
 
+![image](https://github.com/user-attachments/assets/bb4f2228-3af6-4c01-aaf4-f6eb3156dd67)
+
 
 # NPC Kill Count Tracking
 Track Kill Counts: Automatically tracks and displays the number of kills for various small NPCs in the Barrows crypt, including:
